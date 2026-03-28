@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/npx/Documents/**)",
+      "Read(//Users/npx/**)",
+      "Bash(find /Users/npx/Documents/_workspace/tricore -type f -name *.pen -o -type d -name designs -o -type d -name pencil)",
+      "Bash(rm -rf .git)",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(open /Users/npx/Documents/_workspace/tricore/design-preview/public-landing-animated.html)",
+      "Bash(ls /Users/npx/Documents/_workspace/tricore/*.pen)",
+      "Bash(ls -la /Users/npx/Documents/_workspace/tricore/design-preview/public-*.html)",
+      "Bash(wc -l /Users/npx/Documents/_workspace/tricore/design-preview/public-*.html)",
+      "Bash(open /Users/npx/Documents/_workspace/tricore/design-preview/TriCore-Public-Site.pdf)",
+      "Bash(open /Users/npx/Documents/_workspace/tricore/design-preview/TriCore-Admin-Portal.pdf)",
+      "Bash(wkhtmltopdf --enable-local-file-access --page-size A3 --orientation Portrait --margin-top 0 --margin-bottom 0 --margin-left 0 --margin-right 0 --no-background --background --enable-javascript --javascript-delay 3000 \".superdesign/design_iterations/tricore_logo_1.html\" \".superdesign/design_iterations/tricore_logo_1.pdf\")",
+      "Bash(npm list:*)",
+      "Bash(npx puppeteer:*)",
+      "Bash(node -e \"try{require\\(''puppeteer''\\);console.log\\(''puppeteer available''\\)}catch\\(e\\){console.log\\(''no puppeteer module''\\)}\")"
+    ]
+  }
+}

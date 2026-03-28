@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TriCore — Logo Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tricore_logo_theme.css">
+  <style>
+    /* ===== PAGE LAYOUT ===== */
+    body {
+      min-height: 100vh !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      padding: 60px 24px !important;
+      gap: 80px !important;
+    }
+
+    h1, h2, h3, h4, p, span {
+      font-family: 'Space Grotesk', sans-serif !important;
+    }
+
+    /* ===== HERO — PRIMARY LOGO REVEAL ===== */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 32px;
+    }
+
+    .hero-label {
+      font-size: 10px !important;
+      font-weight: 600 !important;
+      letter-spacing: 4px !important;
+      text-transform: uppercase !important;
+      color: var(--tc-text-dim) !important;
+      opacity: 0;
+      animation: fadeSlideIn 400ms ease-out 1400ms forwards;
+    }
+
+    /* ===== LOGO MARK — THREE PILLARS ===== */
+    .logo-mark {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      opacity: 0;
+      animation: markReveal 800ms ease-out 200ms forwards;
+    }
+
+    .logo-mark svg {
+      overflow: visible;
+    }
+
+    .pillar {
+      opacity: 0;
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+
+    .pillar-1 { animation: pillarGrow 600ms cubic-bezier(0.16, 1, 0.3, 1) 300ms forwards; }
+    .pillar-2 { animation: pillarGrow 600ms cubic-bezier(0.16, 1, 0.3, 1) 450ms forwards; }
+    .pillar-3 { animation: pillarGrow 600ms cubic-bezier(0.16, 1, 0.3, 1) 600ms forwards; }
+
+    .mark-shimmer {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .mark-shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; right: 0; bottom: 0;
+      width: 300%;
+      background: linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.15) 50%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .mark-shimmer:hover::after {
+      opacity: 1;
+      animation: shimmerSweep 2s linear infinite;
+    }
+
+    .mark-shimmer:hover .pillar rect {
+      filter: brightness(1.15);
+      transition: filter 0.2s;
+    }
+
+    /* ===== WORDMARK ===== */
+    .wordmark {
+      text-align: center;
+      opacity: 0;
+      animation: wordmarkSlide 600ms ease-out 800ms forwards;
+    }
+
+    .wordmark-text {
+      font-size: 64px !important;
+      font-weight: 800 !important;
+      letter-spacing: 12px !important;
+      color: var(--tc-text) !important;
+      line-height: 1 !important;
+      margin: 0 !important;
+    }
+
+    .wordmark-tagline {
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      letter-spacing: 6px !important;
+      color: var(--tc-gold) !important;
+      margin-top: 8px !important;
+    }
+
+    /* ===== DIVIDER ===== */
+    .gold-line {
+      width: 60px;
+      height: 2px;
+      background: var(--tc-gradient);
+      opacity: 0;
+      animation: fadeSlideIn 400ms ease-out 1200ms forwards;
+    }
+
+    /* ===== SECTION ===== */
+    .section {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .section-title {
+      font-size: 10px !important;
+      font-weight: 600 !important;
+      letter-spacing: 4px !important;
+      text-transform: uppercase !important;
+      color: var(--tc-text-dim) !important;
+      margin-bottom: 32px !important;
+      padding-bottom: 12px !important;
+      border-bottom: 1px solid var(--tc-border) !important;
+      opacity: 0;
+      animation: fadeSlideIn 400ms ease-out 1600ms forwards;
+    }
+
+    /* ===== VARIATIONS GRID ===== */
+    .variations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .variation-card {
+      border: 1px solid var(--tc-border);
+      padding: 48px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      min-height: 240px;
+      position: relative;
+      transition: border-color 0.2s, transform 0.2s;
+      opacity: 0;
+    }
+
+    .variation-card:nth-child(1) { animation: cardFadeUp 500ms ease-out 1800ms forwards; }
+    .variation-card:nth-child(2) { animation: cardFadeUp 500ms ease-out 1950ms forwards; }
+    .variation-card:nth-child(3) { animation: cardFadeUp 500ms ease-out 2100ms forwards; }
+    .variation-card:nth-child(4) { animation: cardFadeUp 500ms ease-out 2250ms forwards; }
+    .variation-card:nth-child(5) { animation: cardFadeUp 500ms ease-out 2400ms forwards; }
+    .variation-card:nth-child(6) { animation: cardFadeUp 500ms ease-out 2550ms forwards; }
+
+    .variation-card:hover {
+      border-color: var(--tc-gold-20);
+      transform: scale(1.02);
+    }
+
+    .variation-card.light-bg {
+      background: #FFFFFF;
+    }
+
+    .variation-card.dark-bg {
+      background: var(--tc-bg);
+    }
+
+    .variation-card.surface-bg {
+      background: var(--tc-surface);
+    }
+
+    .card-label {
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      font-size: 9px !important;
+      font-weight: 600 !important;
+      letter-spacing: 2px !important;
+      text-transform: uppercase !important;
+      color: var(--tc-text-dim) !important;
+    }
+
+    .light-bg .card-label {
+      color: #999 !important;
+    }
+
+    /* ===== INLINE LOGO COMPONENTS ===== */
+
+    /* Full Lockup Horizontal */
+    .lockup-h {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .lockup-h .lh-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lockup-h .lh-brand {
+      font-size: 28px !important;
+      font-weight: 800 !important;
+      letter-spacing: 6px !important;
+      line-height: 1 !important;
+    }
+
+    .lockup-h .lh-tag {
+      font-size: 9px !important;
+      font-weight: 500 !important;
+      letter-spacing: 4px !important;
+      margin-top: 2px !important;
+    }
+
+    /* Full Lockup Vertical */
+    .lockup-v {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lockup-v .lv-brand {
+      font-size: 24px !important;
+      font-weight: 800 !important;
+      letter-spacing: 6px !important;
+      line-height: 1 !important;
+    }
+
+    .lockup-v .lv-tag {
+      font-size: 9px !important;
+      font-weight: 500 !important;
+      letter-spacing: 4px !important;
+    }
+
+    /* Wordmark Only */
+    .wm-only .wm-brand {
+      font-size: 32px !important;
+      font-weight: 800 !important;
+      letter-spacing: 8px !important;
+      line-height: 1 !important;
+    }
+
+    .wm-only .wm-tag {
+      font-size: 9px !important;
+      font-weight: 500 !important;
+      letter-spacing: 4px !important;
+      margin-top: 4px !important;
+      text-align: center !important;
+    }
+
+    /* Icon Only */
+    .icon-only {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Dark on light text */
+    .text-dark {
+      color: #0A0A0A !important;
+    }
+
+    .tag-dark {
+      color: #B8962E !important;
+    }
+
+    /* ===== SPECS SECTION ===== */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .spec-card {
+      border: 1px solid var(--tc-border);
+      padding: 24px;
+      opacity: 0;
+    }
+
+    .spec-card:nth-child(1) { animation: cardFadeUp 500ms ease-out 2700ms forwards; }
+    .spec-card:nth-child(2) { animation: cardFadeUp 500ms ease-out 2800ms forwards; }
+    .spec-card:nth-child(3) { animation: cardFadeUp 500ms ease-out 2900ms forwards; }
+    .spec-card:nth-child(4) { animation: cardFadeUp 500ms ease-out 3000ms forwards; }
+
+    .spec-label {
+      font-size: 9px !important;
+      font-weight: 600 !important;
+      letter-spacing: 2px !important;
+      text-transform: uppercase !important;
+      color: var(--tc-text-dim) !important;
+      margin-bottom: 12px !important;
+    }
+
+    .spec-value {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      color: var(--tc-text) !important;
+      line-height: 1.6 !important;
+    }
+
+    .spec-value span {
+      color: var(--tc-gold) !important;
+    }
+
+    /* Color swatches */
+    .color-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--tc-border);
+    }
+
+    .color-swatch.gold { background: #D4AF37; }
+    .color-swatch.gold-dark { background: #B8962E; }
+    .color-swatch.black { background: #0A0A0A; border-color: #333; }
+    .color-swatch.white { background: #FFFFFF; }
+
+    /* ===== CLEAR SPACE GUIDE ===== */
+    .clearspace-section {
+      margin-top: 24px;
+      opacity: 0;
+      animation: cardFadeUp 500ms ease-out 3100ms forwards;
+    }
+
+    .clearspace-demo {
+      border: 1px solid var(--tc-border);
+      padding: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .clearspace-box {
+      border: 1px dashed var(--tc-gold-40);
+      padding: 32px 48px;
+      position: relative;
+    }
+
+    .clearspace-label {
+      position: absolute;
+      font-size: 9px !important;
+      font-weight: 500 !important;
+      letter-spacing: 1px !important;
+      color: var(--tc-gold-40) !important;
+    }
+
+    .cl-top { top: 8px; left: 50%; transform: translateX(-50%); }
+    .cl-bottom { bottom: 8px; left: 50%; transform: translateX(-50%); }
+    .cl-left { left: 8px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+    .cl-right { right: 8px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes markReveal {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pillarGrow {
+      from { opacity: 0; transform: scaleY(0); }
+      to { opacity: 1; transform: scaleY(1); }
+    }
+
+    @keyframes wordmarkSlide {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes cardFadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shimmerSweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      body {
+        padding: 40px 16px !important;
+        gap: 60px !important;
+      }
+
+      .wordmark-text {
+        font-size: 36px !important;
+        letter-spacing: 8px !important;
+      }
+
+      .wordmark-tagline {
+        font-size: 11px !important;
+        letter-spacing: 4px !important;
+      }
+
+      .variations-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .lockup-h {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .clearspace-demo {
+        padding: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO: PRIMARY LOGO ===== -->
+  <section class="hero">
+    <div class="hero-label">Brand Identity</div>
+
+    <!-- Logo Mark: Three Pillars -->
+    <div class="mark-shimmer">
+      <div class="logo-mark">
+        <svg width="120" height="100" viewBox="0 0 120 100">
+          <!-- Pillar 1 (Left) -->
+          <g class="pillar pillar-1">
+            <rect x="5" y="20" width="22" height="80" fill="url(#goldGrad)" />
+            <polygon points="5,20 16,0 27,20" fill="url(#goldGrad)" />
+          </g>
+          <!-- Pillar 2 (Center — tallest) -->
+          <g class="pillar pillar-2">
+            <rect x="38" y="10" width="22" height="90" fill="url(#goldGrad)" />
+            <polygon points="38,10 49,-10 60,10" fill="url(#goldGrad)" />
+          </g>
+          <!-- Pillar 3 (Right) -->
+          <g class="pillar pillar-3">
+            <rect x="71" y="20" width="22" height="80" fill="url(#goldGrad)" />
+            <polygon points="71,20 82,0 93,20" fill="url(#goldGrad)" />
+          </g>
+          <!-- Connecting base line -->
+          <rect x="0" y="98" width="98" height="2" fill="#D4AF37" opacity="0.4" />
+          <defs>
+            <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#E8CC6E" />
+              <stop offset="50%" stop-color="#D4AF37" />
+              <stop offset="100%" stop-color="#B8962E" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Wordmark -->
+    <div class="wordmark">
+      <div class="wordmark-text">TRICORE</div>
+      <div class="wordmark-tagline">E V E N T S</div>
+    </div>
+
+    <div class="gold-line"></div>
+  </section>
+
+  <!-- ===== LOGO VARIATIONS ===== -->
+  <section class="section">
+    <div class="section-title">Logo Variations</div>
+    <div class="variations-grid">
+
+      <!-- 1. Full Lockup Horizontal — Dark -->
+      <div class="variation-card dark-bg">
+        <span class="card-label">Horizontal Lockup</span>
+        <div class="lockup-h">
+          <svg width="48" height="40" viewBox="0 0 120 100">
+            <rect x="5" y="20" width="22" height="80" fill="url(#g1)" />
+            <polygon points="5,20 16,0 27,20" fill="url(#g1)" />
+            <rect x="38" y="10" width="22" height="90" fill="url(#g1)" />
+            <polygon points="38,10 49,-10 60,10" fill="url(#g1)" />
+            <rect x="71" y="20" width="22" height="80" fill="url(#g1)" />
+            <polygon points="71,20 82,0 93,20" fill="url(#g1)" />
+            <rect x="0" y="98" width="98" height="2" fill="#D4AF37" opacity="0.4" />
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E8CC6E" />
+                <stop offset="50%" stop-color="#D4AF37" />
+                <stop offset="100%" stop-color="#B8962E" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="lh-text">
+            <div class="lh-brand" style="color: #fff;">TRICORE</div>
+            <div class="lh-tag" style="color: #D4AF37;">E V E N T S</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Full Lockup Vertical — Dark -->
+      <div class="variation-card dark-bg">
+        <span class="card-label">Vertical Lockup</span>
+        <div class="lockup-v">
+          <svg width="60" height="50" viewBox="0 0 120 100">
+            <rect x="5" y="20" width="22" height="80" fill="url(#g1)" />
+            <polygon points="5,20 16,0 27,20" fill="url(#g1)" />
+            <rect x="38" y="10" width="22" height="90" fill="url(#g1)" />
+            <polygon points="38,10 49,-10 60,10" fill="url(#g1)" />
+            <rect x="71" y="20" width="22" height="80" fill="url(#g1)" />
+            <polygon points="71,20 82,0 93,20" fill="url(#g1)" />
+            <rect x="0" y="98" width="98" height="2" fill="#D4AF37" opacity="0.4" />
+          </svg>
+          <div style="text-align: center;">
+            <div class="lv-brand" style="color: #fff;">TRICORE</div>
+            <div class="lv-tag" style="color: #D4AF37;">E V E N T S</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Wordmark Only — Dark -->
+      <div class="variation-card dark-bg">
+        <span class="card-label">Wordmark Only</span>
+        <div class="wm-only" style="text-align: center;">
+          <div class="wm-brand" style="color: #fff;">TRICORE</div>
+          <div class="wm-tag" style="color: #D4AF37;">E V E N T S</div>
+        </div>
+      </div>
+
+      <!-- 4. Icon Only — Dark -->
+      <div class="variation-card dark-bg">
+        <span class="card-label">Icon Mark</span>
+        <div class="icon-only">
+          <svg width="72" height="60" viewBox="0 0 120 100">
+            <rect x="5" y="20" width="22" height="80" fill="url(#g1)" />
+            <polygon points="5,20 16,0 27,20" fill="url(#g1)" />
+            <rect x="38" y="10" width="22" height="90" fill="url(#g1)" />
+            <polygon points="38,10 49,-10 60,10" fill="url(#g1)" />
+            <rect x="71" y="20" width="22" height="80" fill="url(#g1)" />
+            <polygon points="71,20 82,0 93,20" fill="url(#g1)" />
+            <rect x="0" y="98" width="98" height="2" fill="#D4AF37" opacity="0.4" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- 5. Light Background — Gold on White -->
+      <div class="variation-card light-bg">
+        <span class="card-label">Light Version</span>
+        <div class="lockup-h">
+          <svg width="48" height="40" viewBox="0 0 120 100">
+            <rect x="5" y="20" width="22" height="80" fill="#0A0A0A" />
+            <polygon points="5,20 16,0 27,20" fill="#0A0A0A" />
+            <rect x="38" y="10" width="22" height="90" fill="#0A0A0A" />
+            <polygon points="38,10 49,-10 60,10" fill="#0A0A0A" />
+            <rect x="71" y="20" width="22" height="80" fill="#0A0A0A" />
+            <polygon points="71,20 82,0 93,20" fill="#0A0A0A" />
+            <rect x="0" y="98" width="98" height="2" fill="#0A0A0A" opacity="0.2" />
+          </svg>
+          <div class="lh-text">
+            <div class="lh-brand text-dark">TRICORE</div>
+            <div class="lh-tag tag-dark">E V E N T S</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Monochrome White — All white on dark -->
+      <div class="variation-card surface-bg">
+        <span class="card-label">Monochrome</span>
+        <div class="lockup-h">
+          <svg width="48" height="40" viewBox="0 0 120 100">
+            <rect x="5" y="20" width="22" height="80" fill="#FFFFFF" opacity="0.9" />
+            <polygon points="5,20 16,0 27,20" fill="#FFFFFF" opacity="0.9" />
+            <rect x="38" y="10" width="22" height="90" fill="#FFFFFF" opacity="0.9" />
+            <polygon points="38,10 49,-10 60,10" fill="#FFFFFF" opacity="0.9" />
+            <rect x="71" y="20" width="22" height="80" fill="#FFFFFF" opacity="0.9" />
+            <polygon points="71,20 82,0 93,20" fill="#FFFFFF" opacity="0.9" />
+            <rect x="0" y="98" width="98" height="2" fill="#FFFFFF" opacity="0.2" />
+          </svg>
+          <div class="lh-text">
+            <div class="lh-brand" style="color: #fff;">TRICORE</div>
+            <div class="lh-tag" style="color: rgba(255,255,255,0.5);">E V E N T S</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== BRAND SPECS ===== -->
+  <section class="section">
+    <div class="section-title">Brand Specifications</div>
+    <div class="specs-grid">
+
+      <div class="spec-card">
+        <div class="spec-label">Typography</div>
+        <div class="spec-value">
+          Space Grotesk<br>
+          Brand: <span>800 weight</span><br>
+          Tagline: <span>500 weight</span><br>
+          Spacing: <span>4px / 6px</span>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-label">Colors</div>
+        <div class="spec-value">
+          Primary: <span>#D4AF37</span><br>
+          Gradient: <span>#B8962E</span>
+        </div>
+        <div class="color-row">
+          <div class="color-swatch gold"></div>
+          <div class="color-swatch gold-dark"></div>
+          <div class="color-swatch black"></div>
+          <div class="color-swatch white"></div>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-label">Structure</div>
+        <div class="spec-value">
+          Radius: <span>0px</span><br>
+          Shadows: <span>None</span><br>
+          Borders: <span>Sharp, angular</span>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-label">Mark Concept</div>
+        <div class="spec-value">
+          Three pillars with angular peaks — representing <span>strength</span>, <span>structure</span>, and <span>precision</span> in event execution.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== CLEAR SPACE ===== -->
+  <section class="section clearspace-section">
+    <div class="section-title" style="opacity:1; animation:none;">Clear Space Guide</div>
+    <div class="clearspace-demo">
+      <div class="clearspace-box">
+        <span class="clearspace-label cl-top">1x</span>
+        <span class="clearspace-label cl-bottom">1x</span>
+        <span class="clearspace-label cl-left">1.5x</span>
+        <span class="clearspace-label cl-right">1.5x</span>
+        <div class="lockup-h">
+          <svg width="48" height="40" viewBox="0 0 120 100">
+            <rect x="5" y="20" width="22" height="80" fill="url(#g1)" />
+            <polygon points="5,20 16,0 27,20" fill="url(#g1)" />
+            <rect x="38" y="10" width="22" height="90" fill="url(#g1)" />
+            <polygon points="38,10 49,-10 60,10" fill="url(#g1)" />
+            <rect x="71" y="20" width="22" height="80" fill="url(#g1)" />
+            <polygon points="71,20 82,0 93,20" fill="url(#g1)" />
+            <rect x="0" y="98" width="98" height="2" fill="#D4AF37" opacity="0.4" />
+          </svg>
+          <div class="lh-text">
+            <div class="lh-brand" style="color: #fff;">TRICORE</div>
+            <div class="lh-tag" style="color: #D4AF37;">E V E N T S</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

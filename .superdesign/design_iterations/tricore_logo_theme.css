@@ -1,0 +1,77 @@
+/* ========================================
+   TriCore Logo — Theme & Design Tokens
+   Premium Event Brand Identity
+   ======================================== */
+
+:root {
+  /* Brand Colors */
+  --tc-gold: #D4AF37;
+  --tc-gold-dark: #B8962E;
+  --tc-gold-light: #E8CC6E;
+  --tc-gold-dim: rgba(212, 175, 55, 0.08);
+  --tc-gold-20: rgba(212, 175, 55, 0.20);
+  --tc-gold-40: rgba(212, 175, 55, 0.40);
+
+  /* Backgrounds */
+  --tc-bg: #0A0A0A;
+  --tc-bg-alt: #111111;
+  --tc-surface: #161616;
+  --tc-surface-card: #1A1A1A;
+
+  /* Text */
+  --tc-text: #FFFFFF;
+  --tc-text-muted: #A0A0A0;
+  --tc-text-dim: #666666;
+
+  /* Borders */
+  --tc-border: #2A2A2A;
+
+  /* Typography */
+  --tc-font: 'Space Grotesk', sans-serif;
+  --tc-brand-weight: 800;
+  --tc-tagline-weight: 500;
+  --tc-brand-spacing: 4px;
+  --tc-tagline-spacing: 3px;
+
+  /* Structure */
+  --tc-radius: 0px;
+  --tc-shadow: none;
+
+  /* Gold Gradient */
+  --tc-gradient: linear-gradient(180deg, #D4AF37, #B8962E);
+  --tc-gradient-h: linear-gradient(90deg, #D4AF37, #E8CC6E, #D4AF37);
+}
+
+/* Base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--tc-font) !important;
+  background: var(--tc-bg) !important;
+  color: var(--tc-text) !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Brand Typography */
+.brand-name {
+  font-family: var(--tc-font);
+  font-weight: var(--tc-brand-weight);
+  letter-spacing: var(--tc-brand-spacing);
+  text-transform: uppercase;
+}
+
+.brand-tagline {
+  font-family: var(--tc-font);
+  font-weight: var(--tc-tagline-weight);
+  letter-spacing: var(--tc-tagline-spacing);
+  text-transform: uppercase;
+  color: var(--tc-gold);
+}
+
+/* Gold Gradient Text */
+.gold-gradient-text {
+  background: var(--tc-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
