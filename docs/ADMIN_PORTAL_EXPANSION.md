@@ -96,28 +96,120 @@ This is a KEY feature. Not just a list of TriCore events — it's a **contextual
 | **Registration Deadlines** | Orange dot | When your event registrations open/close |
 | **State Holidays** | Pink | State-specific holidays (configurable by selecting state: Karnataka, Maharashtra, etc.) |
 
-### Calendar Data Sources
+### Calendar Data Sources & Sync
 
 ```js
-// Admin Settings → Notifications & Calendar (new settings tab)
+// Admin Settings → Calendar & Sync (new settings tab)
 calendarConfig: {
+  // --- Holidays ---
   showPublicHolidays: Boolean,      // default: true
   state: String,                     // "Karnataka", "Maharashtra", etc.
-  showIPL: Boolean,                  // default: true
-  showISL: Boolean,                  // default: false
-  showPKL: Boolean,                  // default: false
+
+  // --- Sports Feeds ---
+  sportsFeeds: [{
+    name: String,                    // "IPL 2026", "ISL 2025-26", "Premier League"
+    sport: String,                   // "cricket" | "football" | "kabaddi" | "other"
+    enabled: Boolean,
+    color: String,                   // Display color on calendar
+    sourceType: String,              // "api" | "manual" | "ical"
+    sourceUrl: String,               // API endpoint or iCal URL (for api/ical)
+    manualData: [{                   // For manual entry
+      date: Date,
+      title: String,                 // "CSK vs MI"
+      venue: String,
+      time: String
+    }]
+  }],
+
+  // --- Sync Settings ---
+  sync: {
+    autoSync: Boolean,               // default: false
+    syncInterval: String,            // "daily" | "weekly" | "monthly"
+    syncTime: String,                // "02:00" (2 AM — off-peak)
+    lastSyncAt: Date,
+    lastSyncStatus: String           // "success" | "failed" | "partial"
+  },
+
+  // --- Custom Calendars ---
   customCalendars: [{
-    name: String,                    // "Company Holidays"
-    url: String,                     // iCal URL or JSON feed
-    color: String
+    name: String,                    // "Company Holidays", "School Calendar"
+    url: String,                     // iCal URL
+    color: String,
+    enabled: Boolean
   }]
 }
 ```
 
-### Data Sources for Sports Schedules
-- **IPL**: CricketAPI or manual JSON feed updated seasonally
-- **Public Holidays**: India public holiday API (calendarific.com or hardcoded JSON per year)
-- **State Holidays**: Configurable per state selection in admin settings
+### Sports Feeds — Supported Sources
+
+| Sport | Source | Type | Coverage |
+|-------|--------|------|----------|
+| **Cricket (IPL)** | CricketAPI / ESPN Cricinfo | API or Manual JSON | IPL matches with teams, venues, times |
+| **Cricket (International)** | CricketAPI | API | ICC matches, India tours |
+| **Football (ISL)** | Football-Data.org / Manual | API or Manual | Indian Super League |
+| **Football (Premier League)** | Football-Data.org | API | English Premier League |
+| **Football (La Liga, etc.)** | Football-Data.org | API | Major European leagues |
+| **Kabaddi (PKL)** | Manual JSON | Manual | Pro Kabaddi League |
+| **Custom** | iCal URL | iCal feed | Any calendar feed |
+
+### Sync Configuration (Admin UI)
+
+```
+CALENDAR SYNC SETTINGS
+┌─────────────────────────────────────────────────────────┐
+│  AUTO-SYNC                                              │
+│  ● Enable automatic sync    [ON]                        │
+│  ┌─────────────────┬─────────────────┐                 │
+│  │ Sync Interval   │ Sync Time       │                 │
+│  │ [Weekly ▾]      │ [02:00 AM ▾]    │                 │
+│  └─────────────────┴─────────────────┘                 │
+│                                                         │
+│  Last synced: Mar 27, 2026 at 02:00 AM  ✅ Success     │
+│                                                         │
+│  [🔄 Sync Now]  ← Manual trigger button                │
+│                                                         │
+│  SYNC LOG                                               │
+│  ┌──────────────────────────────────────────┐           │
+│  │ Mar 27, 02:00 AM │ ✅ All feeds synced  │           │
+│  │ Mar 20, 02:00 AM │ ✅ All feeds synced  │           │
+│  │ Mar 13, 02:00 AM │ ⚠️ IPL feed partial  │           │
+│  └──────────────────────────────────────────┘           │
+└─────────────────────────────────────────────────────────┘
+
+SPORTS FEEDS
+┌─────────────────────────────────────────────────────────┐
+│ FEED                │ SPORT    │ SOURCE  │ STATUS │     │
+│ IPL 2026            │ Cricket  │ API     │ ✅ ON  │ [⚙]│
+│ ISL 2025-26         │ Football │ Manual  │ ✅ ON  │ [⚙]│
+│ Premier League      │ Football │ API     │ ⬚ OFF │ [⚙]│
+│ PKL Season 11       │ Kabaddi  │ Manual  │ ⬚ OFF │ [⚙]│
+│                                                         │
+│ [+ Add Sports Feed]                                     │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Manual Feed Entry
+When source type is "Manual", admin can add matches/events directly:
+
+```
+ADD MATCHES — IPL 2026
+┌─────────────────────────────────────────────────────────┐
+│ [Upload CSV]  or  add individually:                     │
+│                                                         │
+│ ┌──────────┬──────────────┬────────────┬──────────┐    │
+│ │ Date     │ Match        │ Venue      │ Time     │    │
+│ ├──────────┼──────────────┼────────────┼──────────┤    │
+│ │ Mar 28   │ CSK vs MI    │ Chennai    │ 7:30 PM  │ 🗑 │
+│ │ Mar 29   │ RCB vs DC    │ Bangalore  │ 7:30 PM  │ 🗑 │
+│ │ Mar 30   │ KKR vs SRH   │ Kolkata    │ 3:30 PM  │ 🗑 │
+│ │ Mar 30   │ GT vs PBKS   │ Ahmedabad  │ 7:30 PM  │ 🗑 │
+│ └──────────┴──────────────┴────────────┴──────────┘    │
+│ [+ Add Match]                                           │
+│                                                         │
+│ CSV format: date, title, venue, time                    │
+│ [Download CSV Template]                                 │
+└─────────────────────────────────────────────────────────┘
+```
 
 ### Calendar UI
 
@@ -170,47 +262,98 @@ LEGEND:
 
 New Settings tab: **Notifications & Communications**
 
+Each channel supports **multiple providers** — admin picks one as active.
+
+### 4.1 Email Providers
+
+| Provider | Config Fields | Notes |
+|----------|--------------|-------|
+| **Nodemailer (SMTP)** | Host, Port, Username, Password, From, Reply-To | Default, works with Gmail/custom SMTP |
+| **SendGrid** | API Key, From Email, From Name | Recommended for scale |
+| **Twilio SendGrid** | API Key, From Email | Same as SendGrid (Twilio-owned) |
+| **AWS SES** | Access Key, Secret, Region, From Email | For AWS-hosted deployments |
+
+### 4.2 SMS Providers
+
+| Provider | Config Fields | Notes |
+|----------|--------------|-------|
+| **Twilio** | Account SID, Auth Token, From Number | Global, reliable |
+| **MSG91** | Auth Key, Sender ID, Route, Template ID | India-focused, DLT compliant |
+| **Kaleyra** | API Key, Sender ID | India + international |
+| **AWS SNS** | Access Key, Secret, Region | For AWS deployments |
+
+### 4.3 WhatsApp
+
+| Provider | Config Fields | Notes |
+|----------|--------------|-------|
+| **Meta WhatsApp Business API** (default) | Phone Number ID, Access Token, Business Account ID, Webhook Verify Token | Official Meta API — recommended |
+| **Gupshup** | API Key, App Name, Source Number | India-popular alternative |
+| **Wati** | API Key, Base URL | Simpler setup |
+
+### Admin UI — Notification Settings
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Site Settings                                          │
-│  [Branding] [Theme] [Navigation] [Footer] [Contact]    │
-│  [Notifications & Comms] ★                              │
+│  [Branding] [Theme] [Nav] [Footer] [Contact]            │
+│  [Notifications] ★  [Calendar] ★  [Backup] ★            │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
-│  EMAIL CONFIGURATION                                    │
-│  ┌─────────────────┬─────────────────┐                 │
-│  │ SMTP Host       │ SMTP Port       │                 │
-│  │ smtp.gmail.com  │ 587             │                 │
-│  ├─────────────────┼─────────────────┤                 │
-│  │ Email From      │ Reply-To        │                 │
-│  │ noreply@tricore │ hello@tricore   │                 │
-│  └─────────────────┴─────────────────┘                 │
-│  ● Enable email notifications  [ON]                     │
+│  EMAIL                                          [ON]    │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │ Provider: [SendGrid ▾]                          │   │
+│  │                                                  │   │
+│  │ ┌─────────────────┬─────────────────┐           │   │
+│  │ │ API Key         │ From Email      │           │   │
+│  │ │ SG.••••••••     │ noreply@tricore │           │   │
+│  │ ├─────────────────┼─────────────────┤           │   │
+│  │ │ From Name       │ Reply-To        │           │   │
+│  │ │ TriCore Events  │ hello@tricore   │           │   │
+│  │ └─────────────────┴─────────────────┘           │   │
+│  │ [Test Email →]  Send test to admin email        │   │
+│  └─────────────────────────────────────────────────┘   │
 │                                                         │
-│  SMS CONFIGURATION                                      │
-│  ┌─────────────────┬─────────────────┐                 │
-│  │ Provider        │ API Key         │                 │
-│  │ [MSG91 ▾]       │ ••••••••••      │                 │
-│  ├─────────────────┼─────────────────┤                 │
-│  │ Sender ID       │ Template ID     │                 │
-│  │ TRICOR          │ 12345           │                 │
-│  └─────────────────┴─────────────────┘                 │
-│  ● Enable SMS notifications  [OFF]                      │
+│  SMS                                            [OFF]   │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │ Provider: [Twilio ▾]                            │   │
+│  │                                                  │   │
+│  │ ┌─────────────────┬─────────────────┐           │   │
+│  │ │ Account SID     │ Auth Token      │           │   │
+│  │ │ AC••••••••      │ ••••••••••      │           │   │
+│  │ ├─────────────────┼─────────────────┤           │   │
+│  │ │ From Number     │                 │           │   │
+│  │ │ +1234567890     │                 │           │   │
+│  │ └─────────────────┴─────────────────┘           │   │
+│  │                                                  │   │
+│  │ OR switch to: [MSG91 ▾]                          │   │
+│  │ ┌─────────────────┬─────────────────┐           │   │
+│  │ │ Auth Key        │ Sender ID       │           │   │
+│  │ │ ••••••••••      │ TRICOR          │           │   │
+│  │ ├─────────────────┼─────────────────┤           │   │
+│  │ │ Route           │ DLT Template ID │           │   │
+│  │ │ [Transactional] │ 12345           │           │   │
+│  │ └─────────────────┴─────────────────┘           │   │
+│  │ [Test SMS →]  Send test to admin phone          │   │
+│  └─────────────────────────────────────────────────┘   │
 │                                                         │
-│  WHATSAPP CONFIGURATION                                 │
-│  ┌─────────────────┬─────────────────┐                 │
-│  │ Provider        │ API Key         │                 │
-│  │ [Gupshup ▾]     │ ••••••••••      │                 │
-│  ├─────────────────┼─────────────────┤                 │
-│  │ Business Number │ Template Namespace│                │
-│  │ +91 98765 43210 │ tricore_events  │                 │
-│  └─────────────────┴─────────────────┘                 │
-│  ● Enable WhatsApp notifications  [OFF]                 │
+│  WHATSAPP                                       [OFF]   │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │ Provider: [Meta WhatsApp Business API ▾]        │   │
+│  │                                                  │   │
+│  │ ┌─────────────────┬─────────────────┐           │   │
+│  │ │ Phone Number ID │ Access Token    │           │   │
+│  │ │ 123456789       │ EAA••••••••     │           │   │
+│  │ ├─────────────────┼─────────────────┤           │   │
+│  │ │ Business Acct ID│ Webhook Token   │           │   │
+│  │ │ 987654321       │ tricore_verify  │           │   │
+│  │ └─────────────────┴─────────────────┘           │   │
+│  │ [Test WhatsApp →]  Send test to admin number    │   │
+│  └─────────────────────────────────────────────────┘   │
 │                                                         │
 │  NOTIFICATION TRIGGERS                                  │
-│  Configure which events send notifications:             │
+│  Configure which channels fire per trigger:             │
 │  ┌────────────────────────────┬───┬───┬────┐           │
-│  │ Trigger                    │📧│📱│💬│           │
+│  │ Trigger                    │📧│📱│💬  │           │
 │  ├────────────────────────────┼───┼───┼────┤           │
 │  │ Registration confirmed     │ ✓ │ ✓ │ ✓  │           │
 │  │ Payment received           │ ✓ │ ✓ │ ○  │           │
@@ -222,22 +365,150 @@ New Settings tab: **Notifications & Communications**
 │  │ Registration cancelled     │ ✓ │ ○ │ ○  │           │
 │  └────────────────────────────┴───┴───┴────┘           │
 │  ✓ = enabled  ○ = disabled                             │
-│                                                         │
-│  CALENDAR INTEGRATION                                   │
-│  ┌─────────────────────────────────────┐               │
-│  │ State (for holidays): [Karnataka ▾] │               │
-│  │ ● Show public holidays     [ON]     │               │
-│  │ ● Show IPL schedule        [ON]     │               │
-│  │ ● Show ISL schedule        [OFF]    │               │
-│  │ ● Show PKL schedule        [OFF]    │               │
-│  └─────────────────────────────────────┘               │
+│  (disabled channels greyed out if provider not set up) │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
 ```
 
+### Data Model — NotificationConfig (on SiteSettings)
+
+```js
+notifications: {
+  email: {
+    enabled: Boolean,
+    provider: String,        // "nodemailer" | "sendgrid" | "aws_ses"
+    config: Mixed            // Provider-specific fields
+  },
+  sms: {
+    enabled: Boolean,
+    provider: String,        // "twilio" | "msg91" | "kaleyra" | "aws_sns"
+    config: Mixed
+  },
+  whatsapp: {
+    enabled: Boolean,
+    provider: String,        // "meta" | "gupshup" | "wati"
+    config: Mixed
+  },
+  triggers: {
+    registrationConfirmed:   { email: Boolean, sms: Boolean, whatsapp: Boolean },
+    paymentReceived:         { email: Boolean, sms: Boolean, whatsapp: Boolean },
+    registrationApproved:    { email: Boolean, sms: Boolean, whatsapp: Boolean },
+    eventReminder1Day:       { email: Boolean, sms: Boolean, whatsapp: Boolean },
+    eventReminder1Week:      { email: Boolean, sms: Boolean, whatsapp: Boolean },
+    scheduleChange:          { email: Boolean, sms: Boolean, whatsapp: Boolean },
+    eventCompleted:          { email: Boolean, sms: Boolean, whatsapp: Boolean },
+    registrationCancelled:   { email: Boolean, sms: Boolean, whatsapp: Boolean }
+  }
+}
+```
+
 ---
 
-## 5. Check-In System (Optional per Event)
+## 5. Database Backup System
+
+New Settings tab: **Backup & Maintenance**
+
+Admin can trigger a full database backup, zip it, and email it to configured recipients.
+
+### Admin UI
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Site Settings                                          │
+│  [Branding] [Theme] [Nav] [Footer] [Contact]            │
+│  [Notifications] [Calendar] [Backup & Maintenance] ★    │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  DATABASE BACKUP                                        │
+│                                                         │
+│  MANUAL BACKUP                                          │
+│  [🔄 Backup Now]  ← Triggers immediate backup           │
+│                                                         │
+│  Status: Last backup Mar 27, 2026 at 02:00 AM           │
+│  Size: 14.2 MB (compressed)                             │
+│  Collections: 18 (all included)                         │
+│                                                         │
+│  AUTOMATIC BACKUP                                       │
+│  ● Enable scheduled backups  [ON]                       │
+│  ┌─────────────────┬─────────────────┐                 │
+│  │ Frequency       │ Time            │                 │
+│  │ [Daily ▾]       │ [02:00 AM ▾]    │                 │
+│  └─────────────────┴─────────────────┘                 │
+│  Retention: Keep last [7 ▾] backups                     │
+│                                                         │
+│  EMAIL RECIPIENTS                                       │
+│  Send backup zip to these email addresses:              │
+│  ┌─────────────────────────────────────────┐           │
+│  │ admin@tricoreevents.com              [✕]│           │
+│  │ vikram@tricoreevents.com             [✕]│           │
+│  │ backup@company-storage.com           [✕]│           │
+│  └─────────────────────────────────────────┘           │
+│  [+ Add Email]                                          │
+│                                                         │
+│  BACKUP OPTIONS                                         │
+│  ● Include uploaded media files  [OFF]                  │
+│    (Warning: media can be large — 500MB+)               │
+│  ● Encrypt backup with password  [OFF]                  │
+│    Password: [________________]                         │
+│                                                         │
+│  BACKUP HISTORY                                         │
+│  ┌────────────────────────┬──────┬────────┬──────┐     │
+│  │ Date                   │ Size │ Status │      │     │
+│  ├────────────────────────┼──────┼────────┼──────┤     │
+│  │ Mar 27, 02:00 AM       │14.2MB│ ✅ Sent│ [📥] │     │
+│  │ Mar 26, 02:00 AM       │14.1MB│ ✅ Sent│ [📥] │     │
+│  │ Mar 25, 02:00 AM       │13.9MB│ ✅ Sent│ [📥] │     │
+│  │ Mar 24, 02:00 AM       │13.8MB│ ⚠️ Email│ [📥] │     │
+│  │                        │      │  failed│      │     │
+│  │ Mar 23, 02:00 AM       │13.6MB│ ✅ Sent│ [📥] │     │
+│  └────────────────────────┴──────┴────────┴──────┘     │
+│  [📥] = Download backup directly from server            │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Data Model — BackupConfig (on SiteSettings)
+
+```js
+backup: {
+  autoBackup: Boolean,              // default: false
+  frequency: String,                // "daily" | "weekly" | "monthly"
+  time: String,                     // "02:00" (24h format)
+  retention: Number,                // Keep last N backups (default: 7)
+  emailRecipients: [String],        // Email addresses to send zip to
+  includeMedia: Boolean,            // Include uploads/ folder (default: false)
+  encryptBackup: Boolean,           // Encrypt zip with password
+  encryptionPassword: String,       // Only if encrypt is true
+  lastBackupAt: Date,
+  lastBackupStatus: String,         // "success" | "failed"
+  lastBackupSize: Number            // Bytes
+}
+```
+
+### Implementation
+
+1. **Backup Service** (`backupService.js`):
+   - Uses `mongodump` to export all collections
+   - Compresses to `.zip` using `archiver`
+   - Optionally includes `server/uploads/` directory
+   - Optionally encrypts with password (using `node-7z` or similar)
+   - Sends zip via email using configured email provider
+   - Stores backup metadata in a `BackupHistory` array on SiteSettings
+
+2. **API Endpoints**:
+   - `POST /api/admin/backup/trigger` — Trigger immediate backup
+   - `GET /api/admin/backup/history` — List backup history
+   - `GET /api/admin/backup/download/:id` — Download a specific backup file
+
+3. **Cron Job** (`node-cron`):
+   - Reads `backup.frequency` and `backup.time` from SiteSettings
+   - Runs `backupService.runBackup()` at configured schedule
+   - Sends email with zip attachment
+   - Updates `lastBackupAt` and `lastBackupStatus`
+
+---
+
+## 6. Check-In System (Optional per Event)
 
 ### Configurable in Event Setup
 
@@ -266,7 +537,7 @@ When disabled:
 
 ---
 
-## 6. Post-Event Features (Organizer-Fed Data)
+## 7. Post-Event Features (Organizer-Fed Data)
 
 These features only work when the organizer manually inputs data. No auto-generation.
 
@@ -287,7 +558,7 @@ Nothing is automated or mandatory. The organizer decides what to do after an eve
 
 ---
 
-## 7. Financial Management
+## 8. Financial Management
 
 ### New Screens for Admin (Business Owner)
 
@@ -302,7 +573,7 @@ Nothing is automated or mandatory. The organizer decides what to do after an eve
 
 ---
 
-## 8. Registration Enhancements (Kept in Scope)
+## 9. Registration Enhancements (Kept in Scope)
 
 | Feature | Status | Notes |
 |---------|--------|-------|
@@ -315,7 +586,7 @@ Nothing is automated or mandatory. The organizer decides what to do after an eve
 
 ---
 
-## 9. Updated Navigation (Grouped Sidebar)
+## 10. Updated Navigation (Grouped Sidebar)
 
 ```
 OVERVIEW
@@ -347,15 +618,16 @@ SETTINGS
 
 ---
 
-## 10. Implementation Priority (Revised)
+## 11. Implementation Priority (Revised)
 
 | Phase | Weeks | What | Why |
 |-------|-------|------|-----|
 | **A** | 1-3 | Admin Dashboard (revenue, charts, pipeline, activity feed) | Business visibility |
-| **B** | 4-5 | Calendar View (TriCore events + Indian holidays + IPL/ISL/PKL) | Scheduling intelligence |
+| **B** | 4-5 | Calendar View (TriCore events + holidays + IPL/football/cricket sync) | Scheduling intelligence |
 | **C** | 6-7 | Role-based access (6 roles, event assignment, permission middleware) | Team delegation |
-| **D** | 8-9 | Financial screens (payments, invoices, expenses, P/L) | Business controls |
-| **E** | 10-11 | Notification settings (configurable email/SMS/WhatsApp from admin) | Communication |
-| **F** | 12-13 | Optional check-in + post-event tools | Operations |
-| **G** | 14-15 | Analytics + reports + promo codes | Growth |
-| **H** | 16 | Mobile responsive admin | On-ground ops |
+| **D** | 8-9 | Multi-provider notifications (email: SendGrid/SMTP, SMS: Twilio/MSG91, WhatsApp: Meta) | Communication |
+| **E** | 10-11 | Financial screens (payments, invoices, expenses, P/L) | Business controls |
+| **F** | 12-13 | DB backup system (manual trigger + scheduled + email delivery) | Data safety |
+| **G** | 14-15 | Optional check-in + post-event tools | Operations |
+| **H** | 16-17 | Analytics + reports + promo codes | Growth |
+| **I** | 18 | Mobile responsive admin | On-ground ops |
