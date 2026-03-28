@@ -25,6 +25,7 @@ Every piece of public-facing content — headlines, images, sections, navigation
 | Auth | JWT (bcrypt for passwords) |
 | Validation | Zod |
 | Image Processing | Sharp, Multer |
+| Payments | Razorpay |
 | Icons | Lucide React |
 
 ---
@@ -61,13 +62,17 @@ tricore/
 │       │   ├── eventsApi.js       # Public events endpoints
 │       │   ├── authApi.js         # Auth endpoints
 │       │   ├── adminContentApi.js # Admin CMS CRUD
-│       │   └── uploadApi.js       # Image upload
+│       │   ├── uploadApi.js       # Image upload
+│       │   ├── registrationApi.js # Registration endpoints
+│       │   └── paymentApi.js      # Payment endpoints
 │       │
 │       ├── hooks/
 │       │   ├── usePageContent.js  # Fetch + cache page sections
 │       │   ├── useSiteSettings.js # Fetch site settings (nav, footer, theme)
 │       │   ├── useEvents.js       # Events with filters
-│       │   └── useAuth.js         # Auth state + token
+│       │   ├── useAuth.js         # Auth state + token
+│       │   ├── useRegistration.js # Registration state + actions
+│       │   └── usePayment.js      # Payment flow + Razorpay
 │       │
 │       ├── context/
 │       │   ├── AuthContext.jsx
@@ -105,7 +110,10 @@ tricore/
 │       │   │   ├── TeamSection.jsx
 │       │   │   ├── ContactFormSection.jsx
 │       │   │   ├── FaqSection.jsx
-│       │   │   └── StatsGridSection.jsx
+│       │   │   ├── StatsGridSection.jsx
+│       │   │   ├── SportItemCard.jsx
+│       │   │   ├── RegistrationForm.jsx
+│       │   │   └── PaymentCheckout.jsx
 │       │   │
 │       │   └── admin/
 │       │       ├── PageSectionManager.jsx
@@ -134,6 +142,9 @@ tricore/
 │       │   │   ├── CorporateEventsPage.jsx
 │       │   │   ├── EventsPage.jsx
 │       │   │   ├── EventDetailPage.jsx
+│       │   │   ├── RegisterPage.jsx
+│       │   │   ├── DashboardPage.jsx
+│       │   │   ├── AuthPage.jsx
 │       │   │   ├── ContactPage.jsx
 │       │   │   └── NotFoundPage.jsx
 │       │   └── admin/
@@ -141,6 +152,10 @@ tricore/
 │       │       ├── AdminDashboard.jsx
 │       │       ├── PageEditorPage.jsx
 │       │       ├── EventsManagerPage.jsx
+│       │       ├── EventEditorPage.jsx     # Enhanced with 6 tabs
+│       │       ├── SportItemsManagerPage.jsx
+│       │       ├── RegistrationsManagerPage.jsx
+│       │       ├── RegistrationDetailPage.jsx
 │       │       ├── TestimonialsManagerPage.jsx
 │       │       ├── SiteSettingsPage.jsx
 │       │       └── MediaLibraryPage.jsx
@@ -164,6 +179,9 @@ tricore/
 │       │   ├── SiteSettings.js
 │       │   ├── PageContent.js
 │       │   ├── Event.js
+│       │   ├── SportItem.js
+│       │   ├── Registration.js
+│       │   ├── PublicUser.js
 │       │   ├── Testimonial.js
 │       │   ├── User.js
 │       │   └── MediaAsset.js
@@ -172,11 +190,15 @@ tricore/
 │       │   ├── publicRoutes.js
 │       │   ├── adminRoutes.js
 │       │   ├── authRoutes.js
-│       │   └── uploadRoutes.js
+│       │   ├── uploadRoutes.js
+│       │   └── registrationRoutes.js
 │       ├── controllers/
 │       │   ├── publicController.js
 │       │   ├── adminContentController.js
 │       │   ├── eventsController.js
+│       │   ├── registrationController.js
+│       │   ├── sportItemController.js
+│       │   ├── paymentController.js
 │       │   ├── testimonialsController.js
 │       │   ├── siteSettingsController.js
 │       │   ├── authController.js
@@ -195,7 +217,10 @@ tricore/
 │       │   ├── contentService.js
 │       │   ├── settingsService.js
 │       │   ├── eventsService.js
-│       │   └── uploadService.js
+│       │   ├── uploadService.js
+│       │   ├── registrationService.js
+│       │   ├── paymentService.js
+│       │   └── emailService.js
 │       └── utils/
 │           └── seedDefaults.js
 │
@@ -262,6 +287,19 @@ Admin changes colors in ThemeEditor
   → Entire site reflects new colors without code changes
 ```
 
+### Registration Flow
+
+```
+User clicks "Register" on a sport item
+  → Auth check (logged in as PublicUser?)
+    → NO  → Auth modal (sign in / create account / Google OAuth)
+    → YES → Registration form (varies by type: individual, team, group)
+              → Review & confirm (summary + total price)
+                → Payment (Razorpay checkout, if price > 0)
+                  → Confirmation (registration ID + email confirmation)
+                    → Dashboard (view in "My Registrations")
+```
+
 ---
 
 ## 6. Key Design Decisions
@@ -310,12 +348,21 @@ New section types can be added by:
 
 ## 8. Authentication & Authorization
 
+### Admin Auth
 - **JWT tokens** issued on login, sent via `Authorization: Bearer` header
 - **Two roles**: `admin` (full access), `editor` (content editing only)
 - **Middleware chain**: `auth.js` verifies JWT → `roleGuard.js` checks role
 - **Public routes** have no auth middleware
 - **Admin routes** require auth + admin role
 - **Upload routes** require auth (any role)
+
+### Public User Auth (participants)
+- **Separate collection**: `PublicUser` — not the same as admin `User`
+- **JWT tokens**: issued on login, scoped to public user; separate from admin tokens
+- **Google OAuth**: one-click sign in via Google, stores `googleId` on PublicUser
+- **Email verification**: `emailVerified` flag, verification email sent on signup
+- **Auth methods**: email + password, Google OAuth
+- **Protected public routes**: registration endpoints, dashboard, and payment routes require public user auth
 
 ---
 
@@ -348,3 +395,49 @@ ThemeEditor with color pickers + live preview, dynamic Google Fonts loading, ful
 
 ### Phase 6: Optimization + Deployment
 Loading skeletons, error boundaries, SEO meta from CMS, lazy-loaded sections, image optimization, API caching, production build config.
+
+### Phase 7: Event Detail Page + Sport Items
+Enhanced Event model (schedule, rules, prizes, contacts, sponsors). SportItem model and CRUD. Event Detail page (public) with tabbed layout (About, Sport Items, Schedule, Rules, Contact). Admin Sport Items manager within event editor.
+
+### Phase 8: Registration System
+PublicUser model + auth (email/password + Google OAuth). Registration model and CRUD. Registration forms for individual, team, and group types. Auth modal for unauthenticated users. Admin Registrations manager with filters, approve/reject, CSV export.
+
+### Phase 9: Payment Integration (Razorpay)
+Razorpay integration (create order → checkout modal → verify signature). Payment status tracking on registrations. Cart-based multi-sport checkout. Free event bypass. Payment receipts via email.
+
+### Phase 10: User Dashboard + Notifications
+User dashboard with registration list, upcoming events, and stats. Registration detail view and cancel flow. Email notifications (confirmation, approval, rejection, reminders). Event reminder emails (1 day before).
+
+---
+
+## 11. Admin Event Management Screens
+
+### Event Editor Enhanced
+The existing event editor gains 6 tabs:
+- **Basic Info** — existing fields (title, description, dates, venue, status, images)
+- **Sport Items** — add/edit/reorder sport items with type, capacity, pricing, rules
+- **Schedule** — add/edit/reorder schedule entries (time + title + description)
+- **Rules & Prizes** — rich text editors for event-level rules and prize information
+- **Contacts** — event coordinator cards (name, role, phone, email)
+- **Sponsors** — sponsor entries (name, logo URL, website URL)
+
+### Sport Items Manager
+Accessible from the Event Editor "Sport Items" tab. Allows admins to:
+- Add sport items (name, registration type, capacity, pricing, age/gender rules)
+- Reorder sport items via drag-and-drop
+- Toggle item status (open / closed / cancelled)
+- View current registration count per item
+
+### Registrations Manager
+New admin sidebar item. Data table with filters:
+- Filter by event, sport item, status (pending / confirmed / waitlisted / cancelled / rejected), payment status
+- Columns: participant/team name, sport item, registration type, status, payment status, date
+- Bulk actions: approve, reject
+- Export registrations as CSV
+
+### Registration Detail
+Drill-down from Registrations Manager. Shows:
+- Full participant/team/group details
+- Payment history and transaction ID
+- Registration timeline (created, approved, paid)
+- Admin actions: approve, reject (with reason), add internal notes

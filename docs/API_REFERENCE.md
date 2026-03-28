@@ -20,15 +20,55 @@ Tokens are issued via `POST /api/auth/login` and expire after 24 hours.
 
 ## Auth Endpoints
 
-### POST /api/auth/login
+### POST /api/auth/register
 
-Login and receive a JWT token.
+Create a public user account (for event participants).
 
 **Body:**
 ```json
 {
-  "email": "admin@tricore.com",
-  "password": "yourpassword"
+  "name": "Rajesh Kumar",
+  "email": "rajesh@example.com",
+  "phone": "+91 98765 43210",
+  "password": "securepassword123"
+}
+```
+
+**Response 201:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "661a...",
+    "name": "Rajesh Kumar",
+    "email": "rajesh@example.com",
+    "phone": "+91 98765 43210",
+    "role": "user"
+  }
+}
+```
+
+**Response 400:**
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    { "field": "email", "message": "Email is already registered" }
+  ]
+}
+```
+
+---
+
+### POST /api/auth/login
+
+Login and receive a JWT token. Works for both admin and public users.
+
+**Body:**
+```json
+{
+  "email": "rajesh@example.com",
+  "password": "securepassword123"
 }
 ```
 
@@ -37,10 +77,10 @@ Login and receive a JWT token.
 {
   "token": "eyJhbGciOiJIUzI1NiIs...",
   "user": {
-    "id": "660a...",
-    "email": "admin@tricore.com",
-    "name": "Admin",
-    "role": "admin"
+    "id": "661a...",
+    "email": "rajesh@example.com",
+    "name": "Rajesh Kumar",
+    "role": "user"
   }
 }
 ```
@@ -52,13 +92,56 @@ Login and receive a JWT token.
 
 ---
 
+### POST /api/auth/google
+
+Authenticate via Google OAuth. Creates a new account if the user does not exist, or logs in if they do.
+
+**Body:**
+```json
+{
+  "googleToken": "eyJhbGciOiJSUzI1NiIs..."
+}
+```
+
+**Response 200:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "661a...",
+    "email": "rajesh@gmail.com",
+    "name": "Rajesh Kumar",
+    "avatar": "https://lh3.googleusercontent.com/...",
+    "role": "user"
+  },
+  "isNewUser": false
+}
+```
+
+---
+
 ### GET /api/auth/me
 
 Get the currently authenticated user.
 
 **Headers:** `Authorization: Bearer <token>`
 
-**Response 200:**
+**Response 200 (public user):**
+```json
+{
+  "id": "661a...",
+  "email": "rajesh@example.com",
+  "name": "Rajesh Kumar",
+  "phone": "+91 98765 43210",
+  "avatar": null,
+  "city": "Bangalore",
+  "company": null,
+  "sportsInterests": ["cricket", "badminton"],
+  "role": "user"
+}
+```
+
+**Response 200 (admin):**
 ```json
 {
   "id": "660a...",
@@ -251,7 +334,7 @@ List public events.
 
 ### GET /api/content/events/:slug
 
-Get a single event by slug.
+Get a single event by slug. Includes sport items, schedule, rules, prizes, contacts, and sponsors.
 
 **Response 200:**
 ```json
@@ -270,16 +353,127 @@ Get a single event by slug.
   "gallery": ["/uploads/pcl-1.webp", "/uploads/pcl-2.webp"],
   "status": "upcoming",
   "featured": true,
-  "registrationEnabled": true,
-  "maxParticipants": 200,
-  "price": 500,
-  "tags": ["cricket", "tournament", "season-4"]
+  "tags": ["cricket", "tournament", "season-4"],
+  "registrationConfig": {
+    "enabled": true,
+    "opensAt": "2026-03-01T00:00:00Z",
+    "closesAt": "2026-04-10T00:00:00Z",
+    "requiresApproval": false,
+    "allowWaitlist": true
+  },
+  "sportItems": [
+    {
+      "id": "661b...",
+      "name": "Cricket - Men's",
+      "description": "Men's cricket tournament...",
+      "icon": "bat",
+      "registrationType": "team",
+      "maxTeams": 16,
+      "teamSize": { "min": 6, "max": 11 },
+      "price": 500,
+      "currency": "INR",
+      "gender": "male",
+      "status": "open",
+      "registrationCount": 12,
+      "order": 0
+    },
+    {
+      "id": "661c...",
+      "name": "Badminton Singles",
+      "description": "Individual badminton competition...",
+      "icon": "racquet",
+      "registrationType": "individual",
+      "maxParticipants": 32,
+      "price": 200,
+      "currency": "INR",
+      "gender": "any",
+      "status": "open",
+      "registrationCount": 18,
+      "order": 1
+    }
+  ],
+  "schedule": [
+    { "time": "09:00 AM", "title": "Opening Ceremony", "description": "Welcome and introductions" },
+    { "time": "09:30 AM", "title": "Cricket Pool Matches Begin", "description": "Group stage matches" },
+    { "time": "12:00 PM", "title": "Lunch Break", "description": "" },
+    { "time": "01:00 PM", "title": "Badminton Rounds", "description": "Round of 32 and 16" },
+    { "time": "04:00 PM", "title": "Semi Finals", "description": "All sports" },
+    { "time": "06:00 PM", "title": "Finals & Prize Ceremony", "description": "Championship matches and awards" }
+  ],
+  "rules": "### General Rules\n1. All participants must carry valid ID...\n2. Teams must report 30 minutes before...",
+  "prizes": "### Prize Pool\n- Winner: ₹50,000\n- Runner-up: ₹25,000\n- Best Player: ₹5,000",
+  "contacts": [
+    {
+      "name": "Vikram Sharma",
+      "role": "Event Coordinator",
+      "phone": "+91 98765 43210",
+      "email": "vikram@tricoreevents.com"
+    }
+  ],
+  "sponsors": [
+    {
+      "name": "Spark 7 Arena",
+      "logo": "/uploads/spark7-logo.webp",
+      "url": "https://spark7arena.com"
+    }
+  ]
 }
 ```
 
 **Response 404:**
 ```json
 { "error": "Event not found" }
+```
+
+---
+
+### GET /api/content/events/:slug/sport-items
+
+List all sport items for an event with current registration counts. No authentication required.
+
+**Response 200:**
+```json
+{
+  "sportItems": [
+    {
+      "id": "661b...",
+      "eventId": "660a...",
+      "name": "Cricket - Men's",
+      "description": "Men's cricket tournament...",
+      "icon": "bat",
+      "image": "/uploads/cricket-mens.webp",
+      "registrationType": "team",
+      "maxTeams": 16,
+      "teamSize": { "min": 6, "max": 11 },
+      "price": 500,
+      "currency": "INR",
+      "rules": "Standard ICC rules apply...",
+      "ageLimit": { "min": 16, "max": null },
+      "gender": "male",
+      "status": "open",
+      "registrationCount": 12,
+      "order": 0
+    },
+    {
+      "id": "661c...",
+      "eventId": "660a...",
+      "name": "Badminton Singles",
+      "description": "Individual badminton competition...",
+      "icon": "racquet",
+      "image": "/uploads/badminton.webp",
+      "registrationType": "individual",
+      "maxParticipants": 32,
+      "price": 200,
+      "currency": "INR",
+      "rules": "BWF rules apply...",
+      "ageLimit": { "min": 14, "max": null },
+      "gender": "any",
+      "status": "open",
+      "registrationCount": 18,
+      "order": 1
+    }
+  ]
+}
 ```
 
 ---
@@ -483,6 +677,678 @@ Reorder sections on a page.
   "enabled": true
 }
 ```
+
+---
+
+## Registration Endpoints
+
+Require `Authorization: Bearer <token>` (authenticated public user).
+
+---
+
+### POST /api/registrations
+
+Create a new registration for a sport item. Request body varies by registration type.
+
+**Body (individual):**
+```json
+{
+  "eventId": "660a...",
+  "sportItemId": "661c...",
+  "type": "individual",
+  "participant": {
+    "name": "Rajesh Kumar",
+    "email": "rajesh@example.com",
+    "phone": "+91 98765 43210",
+    "age": 28,
+    "gender": "male"
+  }
+}
+```
+
+**Body (team):**
+```json
+{
+  "eventId": "660a...",
+  "sportItemId": "661b...",
+  "type": "team",
+  "team": {
+    "name": "Thunder Strikers",
+    "captainName": "Rajesh Kumar",
+    "captainPhone": "+91 98765 43210",
+    "captainEmail": "rajesh@example.com",
+    "players": [
+      { "name": "Amit Singh", "email": "amit@example.com", "phone": "+91 91234 56789", "age": 25, "gender": "male", "role": "Batsman" },
+      { "name": "Vikas Patel", "email": "vikas@example.com", "phone": "+91 92345 67890", "age": 27, "gender": "male", "role": "Bowler" },
+      { "name": "Suresh Nair", "email": "suresh@example.com", "phone": "+91 93456 78901", "age": 24, "gender": "male", "role": "All-rounder" },
+      { "name": "Deepak Rao", "email": "deepak@example.com", "phone": "+91 94567 89012", "age": 26, "gender": "male", "role": "Wicket-keeper" },
+      { "name": "Kiran Joshi", "email": "kiran@example.com", "phone": "+91 95678 90123", "age": 23, "gender": "male", "role": "Bowler" },
+      { "name": "Manoj Verma", "email": "manoj@example.com", "phone": "+91 96789 01234", "age": 29, "gender": "male", "role": "Batsman" }
+    ]
+  }
+}
+```
+
+**Body (group):**
+```json
+{
+  "eventId": "660a...",
+  "sportItemId": "661d...",
+  "type": "group",
+  "group": {
+    "companyName": "TechVista Solutions",
+    "contactPerson": "Priya Sharma",
+    "contactEmail": "priya@techvista.com",
+    "contactPhone": "+91 97890 12345",
+    "headCount": 25,
+    "participants": [
+      { "name": "Employee One", "email": "emp1@techvista.com" },
+      { "name": "Employee Two", "email": "emp2@techvista.com" }
+    ]
+  }
+}
+```
+
+**Response 201:**
+```json
+{
+  "id": "662a...",
+  "eventId": "660a...",
+  "sportItemId": "661b...",
+  "type": "team",
+  "team": {
+    "name": "Thunder Strikers",
+    "captainName": "Rajesh Kumar",
+    "captainPhone": "+91 98765 43210",
+    "captainEmail": "rajesh@example.com",
+    "players": [ ... ]
+  },
+  "payment": {
+    "amount": 500,
+    "currency": "INR",
+    "status": "pending",
+    "method": null,
+    "transactionId": null,
+    "paidAt": null
+  },
+  "status": "pending",
+  "createdAt": "2026-03-28T10:00:00Z"
+}
+```
+
+**Response 400:**
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    { "field": "team.players", "message": "Minimum 6 players required" }
+  ]
+}
+```
+
+---
+
+### GET /api/registrations/my
+
+List all registrations for the currently authenticated user.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response 200:**
+```json
+{
+  "registrations": [
+    {
+      "id": "662a...",
+      "event": {
+        "id": "660a...",
+        "title": "Premier Cricket League Season 4",
+        "slug": "premier-cricket-league-s4",
+        "date": "2026-04-15T00:00:00Z",
+        "endDate": "2026-04-20T00:00:00Z",
+        "venue": "Spark 7 Sports Arena",
+        "image": "/uploads/pcl-cover.webp"
+      },
+      "sportItem": {
+        "id": "661b...",
+        "name": "Cricket - Men's",
+        "icon": "bat"
+      },
+      "type": "team",
+      "team": { "name": "Thunder Strikers" },
+      "payment": { "amount": 500, "currency": "INR", "status": "paid" },
+      "status": "confirmed",
+      "createdAt": "2026-03-28T10:00:00Z"
+    },
+    {
+      "id": "662b...",
+      "event": {
+        "id": "660a...",
+        "title": "Premier Cricket League Season 4",
+        "slug": "premier-cricket-league-s4",
+        "date": "2026-04-15T00:00:00Z",
+        "endDate": "2026-04-20T00:00:00Z",
+        "venue": "Spark 7 Sports Arena",
+        "image": "/uploads/pcl-cover.webp"
+      },
+      "sportItem": {
+        "id": "661c...",
+        "name": "Badminton Singles",
+        "icon": "racquet"
+      },
+      "type": "individual",
+      "participant": { "name": "Rajesh Kumar" },
+      "payment": { "amount": 200, "currency": "INR", "status": "paid" },
+      "status": "confirmed",
+      "createdAt": "2026-03-28T10:05:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### GET /api/registrations/:id
+
+Get full details of a specific registration. Only accessible by the registration owner.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response 200:**
+```json
+{
+  "id": "662a...",
+  "userId": "661a...",
+  "event": {
+    "id": "660a...",
+    "title": "Premier Cricket League Season 4",
+    "slug": "premier-cricket-league-s4",
+    "date": "2026-04-15T00:00:00Z",
+    "endDate": "2026-04-20T00:00:00Z",
+    "location": "Bangalore",
+    "venue": "Spark 7 Sports Arena"
+  },
+  "sportItem": {
+    "id": "661b...",
+    "name": "Cricket - Men's",
+    "icon": "bat",
+    "registrationType": "team"
+  },
+  "type": "team",
+  "team": {
+    "name": "Thunder Strikers",
+    "captainName": "Rajesh Kumar",
+    "captainPhone": "+91 98765 43210",
+    "captainEmail": "rajesh@example.com",
+    "players": [
+      { "name": "Amit Singh", "email": "amit@example.com", "phone": "+91 91234 56789", "age": 25, "gender": "male", "role": "Batsman" },
+      { "name": "Vikas Patel", "email": "vikas@example.com", "phone": "+91 92345 67890", "age": 27, "gender": "male", "role": "Bowler" }
+    ]
+  },
+  "payment": {
+    "amount": 500,
+    "currency": "INR",
+    "status": "paid",
+    "method": "razorpay",
+    "transactionId": "pay_Oq2mK8Xg3z...",
+    "paidAt": "2026-03-28T10:02:00Z"
+  },
+  "status": "confirmed",
+  "createdAt": "2026-03-28T10:00:00Z",
+  "updatedAt": "2026-03-28T10:02:00Z"
+}
+```
+
+**Response 404:**
+```json
+{ "error": "Registration not found" }
+```
+
+---
+
+### PUT /api/registrations/:id/cancel
+
+Cancel a registration. Only accessible by the registration owner. Cannot cancel already-cancelled or rejected registrations.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response 200:**
+```json
+{
+  "id": "662a...",
+  "status": "cancelled",
+  "payment": {
+    "amount": 500,
+    "currency": "INR",
+    "status": "refunded"
+  },
+  "message": "Registration cancelled successfully"
+}
+```
+
+**Response 400:**
+```json
+{ "error": "Registration is already cancelled" }
+```
+
+---
+
+## Payment Endpoints
+
+Require `Authorization: Bearer <token>` (authenticated public user).
+
+---
+
+### POST /api/payments/create-order
+
+Create a Razorpay order for a registration. Called before opening the Razorpay checkout modal.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body:**
+```json
+{
+  "registrationId": "662a...",
+  "amount": 500
+}
+```
+
+**Response 200:**
+```json
+{
+  "orderId": "order_Oq2abc123...",
+  "amount": 500,
+  "currency": "INR",
+  "registrationId": "662a...",
+  "razorpayKey": "rzp_live_xxxxxxxx"
+}
+```
+
+**Response 400:**
+```json
+{ "error": "Registration already paid" }
+```
+
+---
+
+### POST /api/payments/verify
+
+Verify a payment after Razorpay checkout completes. Updates registration payment status and confirms the registration.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Body:**
+```json
+{
+  "paymentId": "pay_Oq2mK8Xg3z...",
+  "orderId": "order_Oq2abc123...",
+  "signature": "d4e5f6a7b8c9..."
+}
+```
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "registration": {
+    "id": "662a...",
+    "status": "confirmed",
+    "payment": {
+      "amount": 500,
+      "currency": "INR",
+      "status": "paid",
+      "method": "razorpay",
+      "transactionId": "pay_Oq2mK8Xg3z...",
+      "paidAt": "2026-03-28T10:02:00Z"
+    }
+  }
+}
+```
+
+**Response 400:**
+```json
+{ "error": "Payment verification failed" }
+```
+
+---
+
+## Admin Sport Items
+
+All require `Authorization: Bearer <token>` with admin role.
+
+---
+
+### GET /api/admin/events/:id/sport-items
+
+List all sport items for an event (admin view).
+
+**Response 200:**
+```json
+{
+  "sportItems": [
+    {
+      "id": "661b...",
+      "eventId": "660a...",
+      "name": "Cricket - Men's",
+      "description": "Men's cricket tournament...",
+      "icon": "bat",
+      "image": "/uploads/cricket-mens.webp",
+      "registrationType": "team",
+      "maxTeams": 16,
+      "teamSize": { "min": 6, "max": 11 },
+      "price": 500,
+      "currency": "INR",
+      "rules": "Standard ICC rules apply...",
+      "ageLimit": { "min": 16, "max": null },
+      "gender": "male",
+      "status": "open",
+      "registrationCount": 12,
+      "order": 0,
+      "createdAt": "2026-03-20T08:00:00Z",
+      "updatedAt": "2026-03-28T10:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### POST /api/admin/events/:id/sport-items
+
+Add a new sport item to an event.
+
+**Body:**
+```json
+{
+  "name": "Cricket - Women's",
+  "description": "Women's cricket tournament...",
+  "icon": "bat",
+  "image": "/uploads/cricket-womens.webp",
+  "registrationType": "team",
+  "maxTeams": 8,
+  "teamSize": { "min": 6, "max": 11 },
+  "price": 500,
+  "currency": "INR",
+  "rules": "Standard ICC rules apply...",
+  "ageLimit": { "min": 16, "max": null },
+  "gender": "female",
+  "status": "open",
+  "order": 1
+}
+```
+
+**Response 201:**
+```json
+{
+  "id": "661d...",
+  "eventId": "660a...",
+  "name": "Cricket - Women's",
+  "description": "Women's cricket tournament...",
+  "icon": "bat",
+  "image": "/uploads/cricket-womens.webp",
+  "registrationType": "team",
+  "maxTeams": 8,
+  "teamSize": { "min": 6, "max": 11 },
+  "price": 500,
+  "currency": "INR",
+  "rules": "Standard ICC rules apply...",
+  "ageLimit": { "min": 16, "max": null },
+  "gender": "female",
+  "status": "open",
+  "registrationCount": 0,
+  "order": 1,
+  "createdAt": "2026-03-28T10:00:00Z",
+  "updatedAt": "2026-03-28T10:00:00Z"
+}
+```
+
+---
+
+### PUT /api/admin/sport-items/:id
+
+Update an existing sport item.
+
+**Body:** (partial update supported)
+```json
+{
+  "price": 600,
+  "maxTeams": 12,
+  "status": "closed"
+}
+```
+
+**Response 200:** Updated sport item object.
+
+---
+
+### DELETE /api/admin/sport-items/:id
+
+Delete a sport item. Fails if there are existing registrations for this item.
+
+**Response 200:**
+```json
+{ "message": "Sport item deleted successfully" }
+```
+
+**Response 400:**
+```json
+{ "error": "Cannot delete sport item with existing registrations" }
+```
+
+---
+
+## Admin Registrations
+
+All require `Authorization: Bearer <token>` with admin role.
+
+---
+
+### GET /api/admin/events/:id/registrations
+
+List all registrations for a specific event.
+
+**Query params:**
+| Param | Type | Description |
+|-------|------|-------------|
+| `sportItemId` | string | Filter by sport item |
+| `status` | string | Filter by: `pending`, `confirmed`, `waitlisted`, `cancelled`, `rejected` |
+| `paymentStatus` | string | Filter by: `pending`, `paid`, `failed`, `refunded` |
+| `type` | string | Filter by: `individual`, `team`, `group` |
+| `search` | string | Search by participant/team name |
+| `limit` | number | Default: 25 |
+| `page` | number | Default: 1 |
+
+**Response 200:**
+```json
+{
+  "registrations": [
+    {
+      "id": "662a...",
+      "user": { "id": "661a...", "name": "Rajesh Kumar", "email": "rajesh@example.com" },
+      "sportItem": { "id": "661b...", "name": "Cricket - Men's" },
+      "type": "team",
+      "team": { "name": "Thunder Strikers", "captainName": "Rajesh Kumar" },
+      "payment": { "amount": 500, "status": "paid" },
+      "status": "confirmed",
+      "createdAt": "2026-03-28T10:00:00Z"
+    }
+  ],
+  "total": 45,
+  "page": 1,
+  "totalPages": 2
+}
+```
+
+---
+
+### GET /api/admin/registrations
+
+List all registrations across all events (global view).
+
+**Query params:**
+| Param | Type | Description |
+|-------|------|-------------|
+| `eventId` | string | Filter by event |
+| `sportItemId` | string | Filter by sport item |
+| `status` | string | Filter by registration status |
+| `paymentStatus` | string | Filter by payment status |
+| `type` | string | Filter by registration type |
+| `search` | string | Search by participant/team/company name |
+| `limit` | number | Default: 25 |
+| `page` | number | Default: 1 |
+
+**Response 200:**
+```json
+{
+  "registrations": [
+    {
+      "id": "662a...",
+      "user": { "id": "661a...", "name": "Rajesh Kumar", "email": "rajesh@example.com" },
+      "event": { "id": "660a...", "title": "Premier Cricket League Season 4" },
+      "sportItem": { "id": "661b...", "name": "Cricket - Men's" },
+      "type": "team",
+      "team": { "name": "Thunder Strikers", "captainName": "Rajesh Kumar" },
+      "payment": { "amount": 500, "status": "paid" },
+      "status": "confirmed",
+      "createdAt": "2026-03-28T10:00:00Z"
+    }
+  ],
+  "total": 120,
+  "page": 1,
+  "totalPages": 5
+}
+```
+
+---
+
+### GET /api/admin/registrations/:id
+
+Get full registration detail (admin view).
+
+**Response 200:**
+```json
+{
+  "id": "662a...",
+  "user": {
+    "id": "661a...",
+    "name": "Rajesh Kumar",
+    "email": "rajesh@example.com",
+    "phone": "+91 98765 43210"
+  },
+  "event": {
+    "id": "660a...",
+    "title": "Premier Cricket League Season 4",
+    "slug": "premier-cricket-league-s4"
+  },
+  "sportItem": {
+    "id": "661b...",
+    "name": "Cricket - Men's",
+    "registrationType": "team"
+  },
+  "type": "team",
+  "team": {
+    "name": "Thunder Strikers",
+    "captainName": "Rajesh Kumar",
+    "captainPhone": "+91 98765 43210",
+    "captainEmail": "rajesh@example.com",
+    "players": [
+      { "name": "Amit Singh", "email": "amit@example.com", "phone": "+91 91234 56789", "age": 25, "gender": "male", "role": "Batsman" },
+      { "name": "Vikas Patel", "email": "vikas@example.com", "phone": "+91 92345 67890", "age": 27, "gender": "male", "role": "Bowler" }
+    ]
+  },
+  "payment": {
+    "amount": 500,
+    "currency": "INR",
+    "status": "paid",
+    "method": "razorpay",
+    "transactionId": "pay_Oq2mK8Xg3z...",
+    "paidAt": "2026-03-28T10:02:00Z"
+  },
+  "status": "confirmed",
+  "notes": "Approved after captain verification",
+  "approvedBy": { "id": "660a...", "name": "Admin" },
+  "approvedAt": "2026-03-28T10:05:00Z",
+  "createdAt": "2026-03-28T10:00:00Z",
+  "updatedAt": "2026-03-28T10:05:00Z"
+}
+```
+
+---
+
+### PUT /api/admin/registrations/:id/approve
+
+Approve a pending registration.
+
+**Body:** (optional)
+```json
+{
+  "notes": "Verified team roster"
+}
+```
+
+**Response 200:**
+```json
+{
+  "id": "662a...",
+  "status": "confirmed",
+  "approvedBy": "660a...",
+  "approvedAt": "2026-03-28T10:05:00Z",
+  "message": "Registration approved successfully"
+}
+```
+
+**Response 400:**
+```json
+{ "error": "Registration is not in pending status" }
+```
+
+---
+
+### PUT /api/admin/registrations/:id/reject
+
+Reject a pending registration.
+
+**Body:**
+```json
+{
+  "notes": "Incomplete team roster — only 4 players listed"
+}
+```
+
+**Response 200:**
+```json
+{
+  "id": "662a...",
+  "status": "rejected",
+  "message": "Registration rejected successfully"
+}
+```
+
+**Response 400:**
+```json
+{ "error": "Registration is not in pending status" }
+```
+
+---
+
+### GET /api/admin/registrations/export/:eventId
+
+Export all registrations for an event as a CSV file.
+
+**Query params:**
+| Param | Type | Description |
+|-------|------|-------------|
+| `sportItemId` | string | Filter by sport item |
+| `status` | string | Filter by registration status |
+
+**Response 200:** CSV file download.
+
+```
+Content-Type: text/csv
+Content-Disposition: attachment; filename="registrations-premier-cricket-league-s4.csv"
+```
+
+CSV columns: `Registration ID, Type, Participant/Team Name, Sport Item, Status, Payment Status, Amount, Date`
 
 ---
 

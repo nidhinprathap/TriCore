@@ -16,6 +16,9 @@ Database: MongoDB via Mongoose
 | `testimonials` | Customer testimonials | Many |
 | `users` | Admin/editor accounts | Few |
 | `mediaassets` | Uploaded image metadata | Many |
+| `sportitems` | Competition/activity units within events | Many per event |
+| `registrations` | Participant sign-ups for sport items | Many |
+| `publicusers` | Participant accounts (separate from admin users) | Many |
 
 ---
 
@@ -280,7 +283,7 @@ Note: Actual testimonial data is populated at read time from the `testimonials` 
 {
   title:               String,   // required
   slug:                String,   // required, unique (URL-friendly)
-  description:         String,   // Full description
+  description:         String,   // Full description (rich text / markdown)
   shortDescription:    String,   // Card/listing preview
   category:            String,   // enum: "sports" | "corporate" | "community"
   date:                Date,     // Event start date
@@ -292,10 +295,41 @@ Note: Actual testimonial data is populated at read time from the `testimonials` 
   status:              String,   // enum: "draft" | "upcoming" | "active" | "completed" | "cancelled"
                                  // default: "draft"
   featured:            Boolean,  // default: false — shown on homepage
-  registrationEnabled: Boolean,  // default: false
-  maxParticipants:     Number,
-  price:               Number,   // default: 0
   tags:                [String],
+
+  // --- Registration config ---
+  registrationConfig: {
+    enabled:           Boolean,  // default: false
+    opensAt:           Date,     // When registration opens
+    closesAt:          Date,     // Registration deadline
+    requiresApproval:  Boolean,  // Admin must approve registrations
+    allowWaitlist:     Boolean,  // Allow signups after max reached
+  },
+
+  sportItems:          [ObjectId],  // ref: SportItem — competition/activity units within this event
+
+  // --- Event detail page fields ---
+  schedule: [{
+    time:              String,   // e.g., "09:00 AM"
+    title:             String,   // e.g., "Opening Ceremony"
+    description:       String
+  }],
+
+  rules:               String,   // Rich text — event rules & regulations
+  prizes:              String,   // Rich text — prize info
+
+  contacts: [{
+    name:              String,
+    role:              String,   // e.g., "Event Coordinator"
+    phone:             String,
+    email:             String
+  }],
+
+  sponsors: [{
+    name:              String,
+    logo:              String,   // URL
+    url:               String
+  }],
 
   timestamps: true
 }
@@ -373,7 +407,185 @@ Note: Actual testimonial data is populated at read time from the `testimonials` 
 
 ---
 
-## 7. Seed Data
+## 7. SportItem
+
+A sport item is a specific competition/activity within an event. This is the unit people register for.
+
+```js
+{
+  eventId:             ObjectId,   // ref: Event — which event this belongs to
+
+  name:                String,     // e.g., "Cricket - Men's", "Badminton Singles", "Relay Race"
+  description:         String,
+  icon:                String,     // Lucide icon name
+  image:               String,     // URL
+
+  // --- Registration type for THIS sport item ---
+  registrationType:    String,     // "individual" | "team" | "group"
+
+  // --- Capacity ---
+  maxParticipants:     Number,     // For individual registrations
+  maxTeams:            Number,     // For team registrations
+  teamSize: {
+    min:               Number,     // Minimum players per team
+    max:               Number      // Maximum players per team
+  },
+
+  // --- Pricing (per registration unit) ---
+  price:               Number,     // Per individual, per team, or per group
+  currency:            String,     // default: "INR"
+
+  // --- Rules specific to this sport item ---
+  rules:               String,     // Rich text
+  ageLimit: {
+    min:               Number,
+    max:               Number
+  },
+  gender:              String,     // "any" | "male" | "female" | "mixed"
+
+  // --- Status ---
+  status:              String,     // "open" | "closed" | "full" | "cancelled"
+
+  // --- Computed ---
+  registrationCount:   Number,     // Current number of registrations
+
+  order:               Number,     // Display order within event
+
+  timestamps: true
+}
+```
+
+### Indexes
+- `eventId`: single (for listing items per event)
+- `eventId` + `status`: compound
+- `status`: single
+
+---
+
+## 8. Registration
+
+A registration is a participant's sign-up for a specific sport item.
+
+```js
+{
+  // --- Who ---
+  userId:              ObjectId,   // ref: PublicUser — the person who registered
+
+  // --- What ---
+  eventId:             ObjectId,   // ref: Event
+  sportItemId:         ObjectId,   // ref: SportItem
+
+  // --- Registration type ---
+  type:                String,     // "individual" | "team" | "group"
+
+  // --- For individual registration ---
+  participant: {
+    name:              String,
+    email:             String,
+    phone:             String,
+    age:               Number,
+    gender:            String
+  },
+
+  // --- For team registration ---
+  team: {
+    name:              String,     // e.g., "Thunder Strikers"
+    captainName:       String,
+    captainPhone:      String,
+    captainEmail:      String,
+    players: [{
+      name:            String,
+      email:           String,
+      phone:           String,
+      age:             Number,
+      gender:          String,
+      role:            String      // e.g., "Batsman", "Bowler", "All-rounder"
+    }]
+  },
+
+  // --- For group registration (corporate) ---
+  group: {
+    companyName:       String,
+    contactPerson:     String,
+    contactEmail:      String,
+    contactPhone:      String,
+    headCount:         Number,
+    participants: [{
+      name:            String,
+      email:           String
+    }]
+  },
+
+  // --- Payment ---
+  payment: {
+    amount:            Number,
+    currency:          String,     // default: "INR"
+    status:            String,     // "pending" | "paid" | "failed" | "refunded"
+    method:            String,     // "razorpay" | "bank_transfer" | "cash"
+    transactionId:     String,     // Payment gateway reference
+    paidAt:            Date
+  },
+
+  // --- Status ---
+  status:              String,     // "pending" | "confirmed" | "waitlisted" | "cancelled" | "rejected"
+
+  // --- Admin ---
+  notes:               String,     // Internal admin notes
+  approvedBy:          ObjectId,   // ref: User (admin who approved)
+  approvedAt:          Date,
+
+  timestamps: true
+}
+```
+
+### Indexes
+- `userId`: single (for "my registrations")
+- `eventId`: single (for admin viewing event registrations)
+- `sportItemId`: single
+- `eventId` + `sportItemId`: compound (for capacity checks)
+- `status`: single
+- `payment.status`: single
+- `createdAt`: single (for sorting)
+
+---
+
+## 9. PublicUser
+
+Participant accounts. Separate from admin users — these are people who register for events.
+
+```js
+{
+  name:                String,     // required
+  email:               String,     // required, unique
+  phone:               String,
+  password:            String,     // bcrypt hashed (for email/password auth)
+
+  // --- OAuth ---
+  googleId:            String,     // For Google OAuth
+  avatar:              String,     // Profile picture URL
+
+  // --- Profile ---
+  city:                String,
+  company:             String,     // For corporate participants
+
+  // --- Preferences ---
+  sportsInterests:     [String],   // e.g., ["cricket", "football", "badminton"]
+
+  // --- Status ---
+  emailVerified:       Boolean,    // default: false
+  active:              Boolean,    // default: true
+
+  timestamps: true
+}
+```
+
+### Indexes
+- `email`: unique
+- `googleId`: sparse unique (only set for Google OAuth users)
+
+---
+
+## 10. Seed Data
 
 On first server startup (or when `pagecontents` collection is empty), `seedDefaults.js` creates:
 
@@ -384,8 +596,10 @@ On first server startup (or when `pagecontents` collection is empty), `seedDefau
    - `corporate-events` — hero, content-block, stats-grid, final-cta
    - `events` — (sections minimal, events listing is dynamic)
    - `contact` — hero, contact-form, faq
-3. **Sample Events** — 3 sample events (one per category)
-4. **Sample Testimonials** — 2 sample testimonials
-5. **Admin User** — default admin account (email + hashed password from env vars)
+3. **Sample Events** — 3 sample events (one per category), each with schedule, rules, contacts, and sponsors
+4. **Sample Sport Items** — 2-3 sport items per sample event (e.g., Cricket - Men's, Badminton Singles) with pricing and capacity
+5. **Sample Registrations** — a few sample registrations across different types (individual, team, group) to demonstrate the registration flow
+6. **Sample Testimonials** — 2 sample testimonials
+7. **Admin User** — default admin account (email + hashed password from env vars)
 
 This ensures the site is never blank and admins can immediately start editing.
