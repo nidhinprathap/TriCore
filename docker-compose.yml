@@ -1,0 +1,15 @@
+services:
+  mongodb:
+    image: mongo:7-jammy
+    container_name: tricore-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - tricore_mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=tricore
+    restart: unless-stopped
+    mem_limit: 512m
+
+volumes:
+  tricore_mongo_data:

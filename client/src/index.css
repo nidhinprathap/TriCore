@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+/* TriCore Design System — Single source of truth
+   Change values here → entire app updates.
+   ThemeProvider.jsx can override these from DB at runtime. */
+
+:root {
+  /* ===== COLORS ===== */
+  --color-primary: #D4AF37;
+  --color-primary-dark: #B8962E;
+  --color-primary-light: #E8CC6E;
+  --color-primary-dim: rgba(212, 175, 55, 0.08);
+  --color-primary-20: rgba(212, 175, 55, 0.20);
+
+  --color-background: #0A0A0A;
+  --color-surface: #141414;
+  --color-surfaceAlt: #111111;
+  --color-surface-card: #1A1A1A;
+
+  --color-text: #FFFFFF;
+  --color-textMuted: #A0A0A0;
+  --color-text-dim: #666666;
+
+  --color-border: #2A2A2A;
+
+  --color-success: #4CAF50;
+  --color-error: #F44336;
+  --color-warning: #FF9800;
+  --color-info: #2196F3;
+
+  /* ===== TYPOGRAPHY ===== */
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Font sizes (from design system doc) */
+  --text-display: 72px;
+  --text-h1: 56px;
+  --text-h2: 40px;
+  --text-h3: 32px;
+  --text-h4: 24px;
+  --text-h5: 20px;
+  --text-body-lg: 18px;
+  --text-body: 16px;
+  --text-body-sm: 14px;
+  --text-caption: 12px;
+  --text-label: 10px;
+  --text-tag: 9px;
+
+  /* Font weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+  --tracking-label: 2px;
+  --tracking-brand: 4px;
+
+  /* ===== SPACING ===== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-30: 120px;
+
+  /* ===== STRUCTURE ===== */
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-full: 9999px;
+
+  /* ===== SHADOWS ===== */
+  --shadow-none: none;
+  --shadow-gold-sm: 0 0 8px rgba(212, 175, 55, 0.15);
+  --shadow-gold-md: 0 0 16px rgba(212, 175, 55, 0.2);
+  --shadow-gold-lg: 0 0 24px rgba(212, 175, 55, 0.25);
+
+  /* ===== TRANSITIONS ===== */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* ===== LAYOUT ===== */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-max: 1440px;
+
+  /* Sidebar */
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 64px;
+  --topbar-height: 64px;
+
+  /* Section padding */
+  --section-py: 80px;
+  --section-px-mobile: 16px;
+  --section-px-tablet: 40px;
+  --section-px-desktop: 64px;
+
+  /* ===== Z-INDEX ===== */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+}
+
+/* ===== BASE RESETS ===== */
+body {
+  font-family: var(--font-body) !important;
+  background-color: var(--color-background) !important;
+  color: var(--color-text) !important;
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--text-body);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading) !important;
+  font-weight: var(--weight-extrabold);
+  line-height: 1.1;
+}
+
+/* ===== TAILWIND THEME EXTENSION ===== */
+@theme {
+  /* Colors */
+  --color-tc-primary: var(--color-primary);
+  --color-tc-primary-dark: var(--color-primary-dark);
+  --color-tc-primary-light: var(--color-primary-light);
+  --color-tc-primary-dim: var(--color-primary-dim);
+  --color-tc-primary-20: var(--color-primary-20);
+  --color-tc-bg: var(--color-background);
+  --color-tc-surface: var(--color-surface);
+  --color-tc-surface-alt: var(--color-surfaceAlt);
+  --color-tc-card: var(--color-surface-card);
+  --color-tc-text: var(--color-text);
+  --color-tc-muted: var(--color-textMuted);
+  --color-tc-dim: var(--color-text-dim);
+  --color-tc-border: var(--color-border);
+  --color-tc-success: var(--color-success);
+  --color-tc-error: var(--color-error);
+  --color-tc-warning: var(--color-warning);
+  --color-tc-info: var(--color-info);
+
+  /* Spacing */
+  --spacing-section-y: var(--space-20);
+  --spacing-section-x: var(--space-6);
+  --spacing-card: var(--space-6);
+  --spacing-gap-sm: var(--space-2);
+  --spacing-gap-md: var(--space-4);
+  --spacing-gap-lg: var(--space-6);
+  --spacing-gap-xl: var(--space-8);
+
+  /* Shadows */
+  --shadow-tc-gold-sm: var(--shadow-gold-sm);
+  --shadow-tc-gold-md: var(--shadow-gold-md);
+  --shadow-tc-gold-lg: var(--shadow-gold-lg);
+}
+
+/* ===== ANIMATIONS ===== */
+
+/* Fade in up — for sections appearing on scroll */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade in — general entrance */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Scale up — for cards on hover */
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Gold shimmer — for logo/brand hover */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Utility classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.5s ease-out forwards;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.4s ease-out forwards;
+}
+
+/* Staggered delays for lists */
+.stagger-1 { animation-delay: 0.1s; opacity: 0; }
+.stagger-2 { animation-delay: 0.2s; opacity: 0; }
+.stagger-3 { animation-delay: 0.3s; opacity: 0; }
+.stagger-4 { animation-delay: 0.4s; opacity: 0; }
+.stagger-5 { animation-delay: 0.5s; opacity: 0; }
+.stagger-6 { animation-delay: 0.6s; opacity: 0; }
+
+/* Hover effects matching design system */
+.hover-gold-glow:hover {
+  box-shadow: var(--shadow-gold-sm);
+  transform: translateY(-2px);
+  transition: all var(--transition-base);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+  transition: transform var(--transition-base);
+}
+
+/* Smooth transition base for all interactive elements */
+button, a, .card, [class*="Card"] {
+  transition: all var(--transition-base);
+}
+
+/* Backdrop blur for scrolled header */
+.header-blur {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(10, 10, 10, 0.8) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

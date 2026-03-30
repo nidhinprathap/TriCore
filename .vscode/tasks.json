@@ -1,0 +1,94 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🚀 Start Everything (MongoDB + Server + Client)",
+      "dependsOn": ["Docker: Start MongoDB", "Dev: Full Stack"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Docker: Start MongoDB",
+      "type": "shell",
+      "command": "docker compose up -d mongodb && echo '✅ MongoDB running on port 27017'",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Docker: Stop MongoDB",
+      "type": "shell",
+      "command": "docker compose down && echo '🛑 MongoDB stopped'",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Docker: MongoDB Logs",
+      "type": "shell",
+      "command": "docker logs -f tricore-mongo",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "new" }
+    },
+    {
+      "label": "Docker: Reset MongoDB (delete data)",
+      "type": "shell",
+      "command": "docker compose down -v && echo '🗑️ MongoDB data deleted'",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Dev: Full Stack",
+      "type": "shell",
+      "command": "npm run dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "new" }
+    },
+    {
+      "label": "Dev: Server Only",
+      "type": "shell",
+      "command": "npm run dev:server",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "new" }
+    },
+    {
+      "label": "Dev: Client Only",
+      "type": "shell",
+      "command": "npm run dev:client",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "new" }
+    },
+    {
+      "label": "Seed Database",
+      "type": "shell",
+      "command": "cd server && npm run seed",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Build Client",
+      "type": "shell",
+      "command": "npm run build",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Install All Dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "⚡ First Time Setup",
+      "type": "shell",
+      "command": "cp -n .env.example .env 2>/dev/null; echo '✅ .env ready' && docker compose up -d mongodb && echo '✅ MongoDB started' && sleep 2 && npm install && echo '✅ Dependencies installed' && cd server && npm run seed && echo '✅ Database seeded' && echo '' && echo '🎉 Setup complete! Run Cmd+Shift+B to start the app.'",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    }
+  ]
+}

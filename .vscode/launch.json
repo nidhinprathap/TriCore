@@ -1,0 +1,41 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Server (Express)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/src/server.js",
+      "cwd": "${workspaceFolder}/server",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "restart": true,
+      "runtimeArgs": ["--watch"],
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Client (Vite)",
+      "type": "node",
+      "request": "launch",
+      "command": "npx vite --host",
+      "cwd": "${workspaceFolder}/client",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Seed Database",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/src/utils/seedDefaults.js",
+      "cwd": "${workspaceFolder}/server",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack (Server + Client)",
+      "configurations": ["Server (Express)", "Client (Vite)"],
+      "stopAll": true
+    }
+  ]
+}
